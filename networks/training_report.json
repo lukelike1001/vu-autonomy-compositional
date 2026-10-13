@@ -1,0 +1,128 @@
+{
+ "grid": "grid/lab_grid.json",
+ "grid_sha256": "be68f00641849e674987ff1f58a302caca079af499e4a01356b8203e98220979",
+ "margin_required": 1.0,
+ "seed": 0,
+ "networks": {
+  "room1": {
+   "file": "room1.onnx",
+   "layers": [
+    2,
+    32,
+    32,
+    5
+   ],
+   "epochs": 400,
+   "params": 1317
+  },
+  "door": {
+   "file": "door.onnx",
+   "layers": [
+    2,
+    4,
+    5
+   ],
+   "epochs": 100,
+   "params": 37
+  },
+  "room2": {
+   "file": "room2.onnx",
+   "layers": [
+    2,
+    32,
+    32,
+    5
+   ],
+   "epochs": 200,
+   "params": 1317
+  }
+ },
+ "sha256": {
+  "room1.onnx": "30555e2048afab57df5c7cd0d5613f642e87c228d17c2b249b98b3fbb7195970",
+  "door.onnx": "72c014c874782ce851130da2a035c1da801ab8613cd0359f1ef33567616f9e05",
+  "room2.onnx": "6d1349e9c6f6f798836fd8a9efc80fb5a43532d4bcf5ff0795a1c4dded51dacd"
+ },
+ "check": {
+  "room1": {
+   "cells": 69,
+   "wrong": [],
+   "accuracy": 1.0,
+   "min_margin": 1.280477523803711,
+   "below_margin": 0,
+   "ops": [
+    "Gemm",
+    "Relu"
+   ],
+   "python_list_call_ok": true
+  },
+  "door": {
+   "cells": 1,
+   "wrong": [],
+   "accuracy": 1.0,
+   "min_margin": 2.73956298828125,
+   "below_margin": 0,
+   "ops": [
+    "Gemm",
+    "Relu"
+   ],
+   "python_list_call_ok": true
+  },
+  "room2": {
+   "cells": 46,
+   "wrong": [],
+   "accuracy": 1.0,
+   "min_margin": 1.833709716796875,
+   "below_margin": 0,
+   "ops": [
+    "Gemm",
+    "Relu"
+   ],
+   "python_list_call_ok": true
+  },
+  "closed_loop": {
+   "starts": 116,
+   "reached_goal_and_stayed": 116,
+   "failures": [],
+   "max_steps": 22,
+   "from_room1_max_steps": 22
+  },
+  "negative_controls": {
+   "nn1_biased_west": {
+    "change": "+3.0 on the We score of NN1's last layer",
+    "nn1_wrong_cells": 9,
+    "closed_loop_failures": 20,
+    "rejected": true,
+    "first_failure": {
+     "start": [
+      12,
+      12
+     ],
+     "end": [
+      11,
+      12
+     ],
+     "steps": 1,
+     "left_regions": true
+    }
+   },
+   "nn1_hovers": {
+    "change": "+50.0 on the XX score of NN1's last layer",
+    "nn1_wrong_cells": 58,
+    "closed_loop_failures": 69,
+    "rejected": true,
+    "first_failure": {
+     "start": [
+      2,
+      14
+     ],
+     "end": [
+      5,
+      14
+     ],
+     "steps": 3,
+     "left_regions": false
+    }
+   }
+  }
+ }
+}
