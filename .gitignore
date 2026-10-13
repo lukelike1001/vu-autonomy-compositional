@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+
+# nuXmv (FBK licence forbids redistribution): installed by install_nuxmv.sh, never committed
+/nuXmv
