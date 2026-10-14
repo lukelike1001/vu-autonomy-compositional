@@ -1,7 +1,7 @@
 # Step 3: the two-room NSBT
 
-A neuro-symbolic behavior tree that flies the 0.65 m two-room grid (`../grid/`) with the three A* networks
-(`../networks/`), written in BehaVerify's DSL after the NeuS 2025 grid world
+A neuro-symbolic behavior tree that flies the 0.65 m two-room grid (`../../grid/`) with the three A* networks
+(`../../networks/`), written in BehaVerify's DSL after the NeuS 2025 grid world
 (`behaverify/REPRODUCIBILITY/2025_NEUS/examples/grid_world/template.tree`). Every result here is about this tree,
 this grid and these networks, not about the room or a flight.
 
@@ -33,17 +33,17 @@ to the safety specification.
 
 Safety holds from all 116 starts. The grid's border is all obstacle, so leaving the grid counts as a crash. Liveness is
 written `AG (start -> AF goal)` so that it does not depend on how BehaVerify's encoding lines up nuXmv's initial state
-with the first tick. `--start x,y` picks another start cell. The goal is read from `../networks/astar_labels.json`, so
+with the first tick. `--start x,y` picks another start cell. The goal is read from `../../networks/astar_labels.json`, so
 it follows NN2 if NN2 is retrained.
 
 **Not yet proved.** BehaVerify translates the tree to a 1,824-line SMV with both specifications (the networks are
 stored as tables, the NeuS paper's fastest strategy). With nuXmv installed by `../install_nuxmv.sh`, from the repo root:
 
 ```
-~/venvs/bv/bin/behaverify nuxmv tree/two_rooms_nsbt.tree smv/ --generate --invar --ctl --nuxmv_path ./nuXmv
+~/venvs/bv/bin/behaverify nuxmv examples/two_rooms/two_rooms_nsbt.tree examples/two_rooms/smv/ --generate --invar --ctl --nuxmv_path ./nuXmv
 ```
 
-## Executed from every start (`simulate_all_starts.py`)
+## Executed from every start (`examples/simulate.py examples/two_rooms`)
 
 `behaverify python` generates the tree into a temporary folder. The harness starts the generated tree on every one of
 the 116 cells and ticks it 60 times with the generated runner's own `full_tick`. This is the generated code running,
@@ -55,7 +55,7 @@ All 116 runs stay on Room 1, doorway or Room 2 cells and settle at `(5, 5)`; the
 
 | file | what |
 |---|---|
-| `generate_tree.py` | writes the tree from `../grid/lab_grid.json` and `../networks/` (`python3 tree/generate_tree.py [--start x,y]`) |
+| `generate_tree.py` | writes the tree from `../../grid/lab_grid.json` and `../../networks/` (`python3 examples/two_rooms/generate_tree.py [--start x,y]`) |
 | `two_rooms_nsbt.tree` | the NSBT |
-| `simulate_all_starts.py` | generates the tree's python with BehaVerify and runs it from every start (`~/venvs/bv/bin/python`, about 5 s; exit 0 = the tree passes) |
+| `../simulate.py` | generates the tree's python with BehaVerify and runs it from every start (`~/venvs/bv/bin/python examples/simulate.py examples/two_rooms`, about 5 s; exit 0 = the tree passes) |
 | `simulation_results.json` | the result above |

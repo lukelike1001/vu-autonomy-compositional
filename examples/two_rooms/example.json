@@ -1,0 +1,9 @@
+{
+ "about": "Two rooms, three networks (NN1, the doorway's, NN2), the region chosen by the drone's row.",
+ "tree": "two_rooms_nsbt.tree",
+ "goal_from": "room2",
+ "start_regions": ["room1", "door", "room2"],
+ "safe_regions": ["room1", "door", "room2"],
+ "must_pass": "door",
+ "must_pass_from": ["room1"]
+}

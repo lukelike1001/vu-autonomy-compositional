@@ -1,0 +1,13 @@
+{
+ "about": "Room 1 only. One node: NN1-fly chooses the move on every tick, from any FLYABLE Room 1 cell to the flyable cell nearest the doorway, and stays there. The doorway is never entered. Flyable = the cells and legs the Neo 2 host's own 0.60 m clearance test accepts at 1.55 m (grid/room1_flyable.json).",
+ "tree": "room1_nn1.tree",
+ "goal_from": "room1_fly",
+ "start_regions": ["room1_fly"],
+ "safe_regions": ["room1_fly"],
+ "flight": {
+  "start_cell": [8, 15],
+  "alt_m": 1.55,
+  "clearance_m": 0.60,
+  "about": "the start cell holds the Neo 2 pad (E 1.47, N 0.64: 28 cm from floor tag 60 toward wall tag 15, nose at wall tag 36), LAB_HOWTO.md section 5; 1.55 m and 0.60 m are the altitude and margin grid/room1_flyable.json was computed at, which the host checks again in the air"
+ }
+}

@@ -1,0 +1,15 @@
+{
+ "passed": true,
+ "tree": "two_rooms_nsbt.tree",
+ "goal": [
+  5,
+  5
+ ],
+ "starts": 116,
+ "ticks": 60,
+ "failures": 0,
+ "longest_to_goal": 22,
+ "unsafe_runs": 0,
+ "no_goal_runs": 0,
+ "first_failures": []
+}

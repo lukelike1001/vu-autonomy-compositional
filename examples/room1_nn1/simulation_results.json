@@ -1,10 +1,14 @@
 {
- "tree": "two_rooms_nsbt.tree",
  "passed": true,
- "starts": 116,
+ "tree": "room1_nn1.tree",
+ "goal": [
+  7,
+  12
+ ],
+ "starts": 22,
  "ticks": 60,
  "failures": 0,
- "longest_to_goal": 22,
+ "longest_to_goal": 8,
  "unsafe_runs": 0,
  "no_goal_runs": 0,
  "first_failures": []
