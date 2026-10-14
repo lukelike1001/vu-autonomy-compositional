@@ -12,6 +12,9 @@ about a flight.
 | `room1.onnx` | Room 1 (69) | `(9, 11)`, directly north of the doorway | `So` (into the doorway) | 2-32-32-5 | 1.28 |
 | `door.onnx` | doorway (1) | `(9, 10)` | `So` (into Room 2 at `(9, 9)`) | 2-4-5 | 2.74 |
 | `room2.onnx` | Room 2 (46) | `(5, 5)`, the free cell nearest the middle of Room 2's box | `XX` (stay) | 2-32-32-5 | 1.83 |
+| `room1_fly.onnx` | Room 1's 22 **flyable** cells (`../grid/room1_flyable.json`) | `(7, 12)`, the flyable cell nearest the doorway | `XX` (stay) | 2-32-32-5 | 1.96 |
+
+`room1_fly` is not part of the three-network chain: it is the one network of the one-node NSBT that flies (`../examples/room1_nn1/`). Its A* moves only between flyable cells, so every label is a leg the Neo 2 host's 0.60 m clearance test accepts.
 
 Coordinates are whole-lab cells `(x, y)`, x east and y north, as in `../grid/lab_grid.json`.
 
@@ -24,7 +27,7 @@ The NeuS 2025 grid-world interface, so each network can be declared as a BehaVer
 - **Output:** one float32 tensor `scores`, shape `[1, 5]`, read by argmax in the order `{'We', 'Ea', 'No', 'So', 'XX'}`.
   A tree declares it the same way, for example
   `variable { bl room1 NEURAL classification {'We', 'Ea', 'No', 'So', 'XX'} inputs {x_cur, y_cur} ... }`
-  (see `../tree/two_rooms_nsbt.tree`).
+  (see `../examples/two_rooms/two_rooms_nsbt.tree`).
 - **Layers:** `Gemm` and `Relu` only, the two operations BehaVerify's nuXmv translation accepts for its fixed-point
   strategy. The table strategy accepts any network.
 

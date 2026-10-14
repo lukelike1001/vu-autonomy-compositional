@@ -49,6 +49,11 @@ ACTIONS = ("We", "Ea", "No", "So", "XX")
 MOVE = {"We": (-1, 0), "Ea": (1, 0), "No": (0, 1), "So": (0, -1), "XX": (0, 0)}
 A_STAR_ORDER = ("No", "Ea", "So", "We")      # neighbour expansion order: fixes A*'s choice among equal paths
 NET_FILES = {"room1": "room1.onnx", "door": "door.onnx", "room2": "room2.onnx"}
+#: NN1-FLY: A* over Room 1's FLYABLE cells only (grid/room1_flyable.json: the cells, and the legs between them, that
+#: the Neo 2 host's 0.60 m clearance test accepts), toward that region's goal, XX (stay) there. For the NSBT that
+#: flies Room 1 alone (examples/room1_nn1). Not part of the 3-network chain.
+FLY_FILE = "room1_fly.onnx"
+FLYABLE_JSON = HERE.parent / "grid" / "room1_flyable.json"
 
 
 # ---------------------------------------------------------------- the labels
@@ -224,6 +229,36 @@ def check(nets: dict, regions: dict, labels: dict, goals: dict, margin: float):
     return report
 
 
+def check_alone(path: Path, cells: set, labels: dict, goal, margin: float):
+    """One network on its own region: argmax = label and margin on every cell, and the closed loop from every cell
+    reaches ``goal``, says XX there, and never leaves ``cells``."""
+    import onnx
+    import onnxruntime as ort
+    ops = sorted({n.op_type for n in onnx.load(path).graph.node})
+    assert set(ops) <= {"Gemm", "Relu"}, ops
+    s = ort.InferenceSession(str(path))
+    act = lambda c: ACTIONS[int(s.run(None, {"inputs": np.array([c], np.float32)})[0].argmax())]
+    order = sorted(cells)
+    scores = np.concatenate([s.run(None, {"inputs": np.array([c], np.float32)})[0] for c in order])
+    wrong = [c for c, i in zip(order, scores.argmax(1)) if ACTIONS[i] != labels[c]]
+    srt = np.sort(scores, 1)
+    gaps = srt[:, -1] - srt[:, -2]
+    fails, longest = [], 0
+    for start in order:
+        c, steps = start, 0
+        while (a := act(c)) != "XX" and steps <= len(cells):
+            c = (c[0] + MOVE[a][0], c[1] + MOVE[a][1])
+            steps += 1
+            if c not in cells:
+                break
+        longest = max(longest, steps)
+        if c != goal or act(c) != "XX":
+            fails.append({"start": start, "end": c, "steps": steps, "left_region": c not in cells})
+    return {"cells": len(order), "accuracy": 1 - len(wrong) / len(order), "wrong": [list(w) for w in wrong],
+            "min_margin": float(gaps.min()), "below_margin": int((gaps < margin).sum()), "ops": ops,
+            "closed_loop": {"starts": len(order), "failures": fails, "longest_steps": longest}}
+
+
 # ---------------------------------------------------------------- figures
 
 def plot(lab: LabGrid, labels: dict, goals: dict, out: Path):
@@ -315,6 +350,24 @@ def main():
 
     rep = check({n: a.out / f for n, f in files.items()}, regions, labels, goals, a.margin)
 
+    # NN1-FLY, on its own: A* over the flyable cells only (so every label is a flyable move), XX at the region's goal
+    fly = json.loads(FLYABLE_JSON.read_text())
+    fly_cells, fly_goal = {tuple(c) for c in fly["cells"]}, tuple(fly["goal"])
+    labels["room1_fly"], _ = label_region(fly_cells, fly_goal, "XX")
+    goals["room1_fly"] = fly_goal
+    hidden = [int(h) for h in a.hidden.split(",") if h]
+    weights, epochs = train(labels["room1_fly"], hidden, a.margin, a.seed, a.max_epochs, scale)
+    to_onnx(weights, FLY_FILE.removesuffix(".onnx"), a.out / FLY_FILE,
+            {"region": "room1_fly", "goal_xy": fly_goal, "goal_action": "XX",
+             "flyable": f"{fly['margin_m']} m at {fly['alt_m']} m, cloud {fly['provenance']['cloud_sha256'][:12]}",
+             "inputs": "(x, y) whole-lab cell, x east, y north", "outputs": "argmax over We, Ea, No, So, XX",
+             "grid_sha256": hashlib.sha256(a.grid.read_bytes()).hexdigest()})
+    trained["room1_fly"] = {"file": FLY_FILE, "layers": [2, *hidden, len(ACTIONS)], "epochs": epochs,
+                            "params": int(sum(W.size + b.size for W, b in weights)),
+                            "flyable_sha256": hashlib.sha256(FLYABLE_JSON.read_bytes()).hexdigest()}
+    print(f"{FLY_FILE}: layers {trained['room1_fly']['layers']}, {epochs} epochs")
+    rep["room1_fly"] = check_alone(a.out / FLY_FILE, fly_cells, labels["room1_fly"], fly_goal, a.margin)
+
     # negative controls: two broken copies of NN1 that the same check must reject
     import tempfile
     import onnx
@@ -336,7 +389,7 @@ def main():
                                "closed_loop_failures": len(fails), "rejected": len(fails) > 0,
                                "first_failure": fails[0] if fails else None}
     rep["negative_controls"] = controls
-    table = {n: {f"{x},{y}": lab for (x, y), lab in sorted(labels[n].items())} for n in files}
+    table = {n: {f"{x},{y}": lab for (x, y), lab in sorted(labels[n].items())} for n in [*files, "room1_fly"]}
     (a.out / "astar_labels.json").write_text(json.dumps({
         "actions": list(ACTIONS), "moves": {k: list(v) for k, v in MOVE.items()},
         "goals_xy": {n: list(g) for n, g in goals.items()}, "room2_entry_xy": list(entry2),
@@ -347,9 +400,9 @@ def main():
         "grid": str(a.grid.resolve().relative_to(HERE.parent)) if a.grid.resolve().is_relative_to(HERE.parent) else str(a.grid),
         "grid_sha256": hashlib.sha256(a.grid.read_bytes()).hexdigest(),
         "margin_required": a.margin, "seed": a.seed, "networks": trained,
-        "sha256": {f: hashlib.sha256((a.out / f).read_bytes()).hexdigest() for f in files.values()},
+        "sha256": {f: hashlib.sha256((a.out / f).read_bytes()).hexdigest() for f in [*files.values(), FLY_FILE]},
         "check": rep}, indent=1, default=str) + "\n")
-    plot(lab, labels, goals, a.out / "astar_policy.png")
+    plot(lab, {n: labels[n] for n in files}, goals, a.out / "astar_policy.png")
 
     for n in files:
         r = rep[n]
@@ -361,8 +414,14 @@ def main():
     for cname, c in rep["negative_controls"].items():
         print(f"  negative control {cname}: {c['nn1_wrong_cells']} wrong cells, "
               f"{c['closed_loop_failures']} closed-loop failures -> rejected {c['rejected']}; e.g. {c['first_failure']}")
+    st = rep["room1_fly"]
+    print(f"  room1_fly: {st['cells']} cells, accuracy {st['accuracy']:.3f}, min margin {st['min_margin']:.2f}, "
+          f"ops {st['ops']}; closed loop {st['closed_loop']['starts'] - len(st['closed_loop']['failures'])}/"
+          f"{st['closed_loop']['starts']} flyable starts stop at {fly_goal} (longest {st['closed_loop']['longest_steps']} "
+          f"moves); failures {st['closed_loop']['failures'][:3]}")
     ok = (all(rep[n]["accuracy"] == 1 and rep[n]["below_margin"] == 0 for n in files) and not cl["failures"]
-          and all(c["rejected"] for c in rep["negative_controls"].values()))
+          and all(c["rejected"] for c in rep["negative_controls"].values())
+          and st["accuracy"] == 1 and st["below_margin"] == 0 and not st["closed_loop"]["failures"])
     raise SystemExit(0 if ok else 1)
 
 

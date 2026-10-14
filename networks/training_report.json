@@ -35,12 +35,25 @@
    ],
    "epochs": 200,
    "params": 1317
+  },
+  "room1_fly": {
+   "file": "room1_fly.onnx",
+   "layers": [
+    2,
+    32,
+    32,
+    5
+   ],
+   "epochs": 200,
+   "params": 1317,
+   "flyable_sha256": "6bd938fdce50b7bbae63b3d54ea389195b3092a65f95cfb97fcddf2738ac24b5"
   }
  },
  "sha256": {
   "room1.onnx": "30555e2048afab57df5c7cd0d5613f642e87c228d17c2b249b98b3fbb7195970",
   "door.onnx": "72c014c874782ce851130da2a035c1da801ab8613cd0359f1ef33567616f9e05",
-  "room2.onnx": "6d1349e9c6f6f798836fd8a9efc80fb5a43532d4bcf5ff0795a1c4dded51dacd"
+  "room2.onnx": "6d1349e9c6f6f798836fd8a9efc80fb5a43532d4bcf5ff0795a1c4dded51dacd",
+  "room1_fly.onnx": "4e157c7fc0f068f09fe979f11d1456a66989b6f8a062f81b4834406651f6190d"
  },
  "check": {
   "room1": {
@@ -85,6 +98,22 @@
    "failures": [],
    "max_steps": 22,
    "from_room1_max_steps": 22
+  },
+  "room1_fly": {
+   "cells": 22,
+   "accuracy": 1.0,
+   "wrong": [],
+   "min_margin": 1.9585235118865967,
+   "below_margin": 0,
+   "ops": [
+    "Gemm",
+    "Relu"
+   ],
+   "closed_loop": {
+    "starts": 22,
+    "failures": [],
+    "longest_steps": 8
+   }
   },
   "negative_controls": {
    "nn1_biased_west": {

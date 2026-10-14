@@ -3,3 +3,6 @@ __pycache__/
 
 # nuXmv (FBK licence forbids redistribution): installed by install_nuxmv.sh, never committed
 /nuXmv
+
+# hardware/a51.sh session logs (on this laptop only)
+hardware/logs/

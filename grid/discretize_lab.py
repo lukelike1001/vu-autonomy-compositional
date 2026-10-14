@@ -17,7 +17,7 @@ Rules:
 * **The doorway is one cell, ``D``.** Removing a doorway cell disconnects the rooms (4-connected). At 0.65 m the
   doorway is a corridor of 5 such cells; the one nearest ``DOOR_POINT`` (the doorway's narrowest point) is ``D``, and
   every other corridor cell goes to the room it stays connected to.
-* **Rooms.** Room 1 is the component holding ``--room1-seed`` (default: the pad at E 0, N 0), Room 2
+* **Rooms.** Room 1 is the component holding ``--room1-seed`` (default: the map origin E 0, N 0, floor tag 39), Room 2
   the component holding ``--room2-seed`` (default: the room-transit end in the ICRA figure), once the
   door cell is removed. Each room's grid is its bounding box; anything in the box that is not that
   room's free space is an obstacle.

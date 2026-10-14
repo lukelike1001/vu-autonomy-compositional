@@ -19,7 +19,7 @@ and uses its `free` layer only.
   the rooms. `D` is the corridor cell nearest the doorway's narrowest point (E 2.475, N -2.70), and every other
   corridor cell goes to the room it stays connected to. (`--cell auto` instead picks the largest size at which the
   door is a single cell: 0.35 m, about 500 free cells. 0.65 m was chosen to keep the networks small to train.)
-- **Rooms** are the components holding the pad (E 0, N 0) and the room-transit end (E 0.1, N -5.6) once `D` is
+- **Rooms** are the components holding the map origin (E 0, N 0, floor tag 39) and the room-transit end (E 0.1, N -5.6) once `D` is
   removed. Each room's grid is its bounding box; everything in the box that is not that room's free space is an
   obstacle.
 
@@ -45,6 +45,17 @@ Room 1 `(9, 11)` → `D (9, 10)` → Room 2 `(9, 9)`. The other corridor cells w
 - **0.65 m loses floor.** 49 m² of the map's 80 m² of free space is reachable (61 m² at 0.35 m). The east wing of
   Room 1 is cut off: its last two free cells (whole-lab `(18, 11)` and `(19, 11)`) are unreachable and kept as free.
 - `cell_size_comparison.png` shows the trade-off between cell size, corridor length and reachable area.
+
+## The flyable region (`flyable.py`, on the flight box)
+
+`room1_flyable.json` holds the Room 1 cells the Neo 2 host would actually fly. A cell's centre must be 0.60 m from
+surveyed structure at 1.55 m, and so must every leg between two 4-adjacent cells. It uses the host's own code
+(`vu_autonomy_core.freespace.ClearanceMap` from the neo2 checkout's pinned core) and the lab's v6.2 cloud, and records
+both. Result: 22 cells reachable from the Neo 2 pad, cell (8, 15) (E 1.47, N 0.64, by floor tag 60), goal (7, 12). It runs on the flight box, where the cloud is:
+
+```
+PYTHONDONTWRITEBYTECODE=1 ~/venvs/neo2-flight/bin/python grid/flyable.py
+```
 
 ## Files
 
