@@ -1,0 +1,3 @@
+#!/bin/bash
+case "$*" in "route get 192.168.2.1") [ "${FAKE_WIFI:-}" = fail ] && echo "192.168.2.1 via 10.2.218.1 dev enp6s0" || echo "192.168.2.1 dev wlp5s0 src 192.168.2.2";;
+             "route show default") echo "default via 10.2.218.1 dev enp6s0";; esac

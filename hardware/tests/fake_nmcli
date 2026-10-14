@@ -1,0 +1,4 @@
+#!/bin/bash
+# FAKE nmcli: FAKE_WIFI=fail leaves the radio on nothing
+[ "$1" = "-g" ] && { [ "${FAKE_WIFI:-}" = fail ] && echo "" || echo "DJI-NEO2-CDF6"; exit 0; }
+echo "fake nmcli $*" >> "${FAKE_LOG:-/dev/null}"; echo "Connection successfully (fake) $2"
